@@ -3,6 +3,8 @@ package khazad
 import (
     "fmt"
     "crypto/cipher"
+
+    "github.com/pedroalbanese/lwcrypto/internal/subtle"
 )
 
 const BlockSize = 8
@@ -47,6 +49,10 @@ func (this *khazadCipher) Encrypt(dst, src []byte) {
         panic("cryptobin/khazad: output not full block")
     }
 
+    if subtle.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
+        panic("cryptobin/khazad: invalid buffer overlap")
+    }
+
     this.crypt(dst, src, this.roundKeyEnc[:]);
 }
 
@@ -57,6 +63,10 @@ func (this *khazadCipher) Decrypt(dst, src []byte) {
 
     if len(dst) < BlockSize {
         panic("cryptobin/khazad: output not full block")
+    }
+
+    if subtle.InexactOverlap(dst[:BlockSize], src[:BlockSize]) {
+        panic("cryptobin/khazad: invalid buffer overlap")
     }
 
     this.crypt(dst, src, this.roundKeyDec[:]);
